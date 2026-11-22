@@ -1,3 +1,6 @@
+import {painter, OL, hash, ease, clamp} from './pixel.js';
+import {drawSum0} from './actors.js';
+
 export const scenes = [
  {label:'01 / LÍNEA DE MONTAJE',title:'Unidad SUM-0. A prueba.',speaker:'CONTROL DE CALIDAD',line:'¿Cuánto es 1 + 1?'},
  {label:'02 / MÓDULO DEFECTUOSO',title:'Algo vino falladito.',speaker:'SUM-0',line:'…¿Tres?'},
@@ -5,49 +8,62 @@ export const scenes = [
  {label:'04 / FUERA DE LA LÍNEA',title:'Una suma a la vez.',speaker:'SUM-0',line:'Primero salgo. Después aprendo.'}
 ];
 export function advanceScene(index){return index+1<scenes.length?index+1:null;}
+
 // Each shot tells its story in 6 seconds, then holds its final pose for the reader.
 // Reduced motion presents that same final pose without conveyor, alarm or movement.
 export function paintStory(ctx,index,time=0,reduced=false){
- const t=reduced?6:Math.min(6,Math.max(0,time));const clamp=v=>Math.max(0,Math.min(1,v));const ease=v=>{const q=clamp(v);return q*q*(3-2*q)};
- ctx.save();ctx.scale(2,2);
- const r=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x),Math.round(y),w,h)};
- const text=(word,x,y,size=7,c='#c6efac')=>{ctx.fillStyle=c;ctx.font=`bold ${size}px monospace`;ctx.textAlign='center';ctx.fillText(word,x,y)};
- r(0,0,320,160,'#10252c');r(0,18,320,102,'#223c42');
- for(let x=0;x<320;x+=40){r(x,18,1,101,'#314e51');r(x+4,23,2,2,'#567064');r(x+35,114,2,2,'#567064')}
- r(11,0,5,120,'#48665e');r(13,0,1,120,'#78927b');r(0,31,32,4,'#48665e');
- for(let x=25;x<320;x+=80){r(x,0,2,14,'#5b746a');r(x-10,14,24,3,'#839579');r(x-8,17,20,2,'#d8e1a0')}
- // Robot arm on the assembly line, inspection screen and exit.
- r(28,53,8,50,'#52776c');r(28,53,39,7,'#829b81');r(60,58,7,15,'#52776c');r(55,71,6,9,'#9aac8e');r(68,71,6,9,'#9aac8e');
- r(184,30,85,47,'#0c2329');r(187,33,79,41,'#4a6a60');r(190,36,73,35,index>0&&index<3?'#4d3232':'#183b40');
- const failed=index>1||(index===1&&t>1.2);text(index===0?'1 + 1 = ?':index===1?(t<1.2?'1 + 1 = 3':'ERROR: 2'):'RECICLAJE',226,51,8,failed?'#ffb197':'#c6efac');text(index===0?'CONTROL DE CALIDAD':index===1?'CALCULO NO VALIDO':'SUM-0 DESCARTADO',226,64,4,failed?'#ec9a80':'#8abca0');
- r(286,45,25,76,'#10262b');r(289,48,19,73,index===3?'#b7d49a':'#456759');if(index===3){r(300,48,8,73,'#87ad8b');text('→',298,83,12,'#1d4544')}text('SALIDA',298,40,4);
- // Slower than 1 Hz alarm: glow only, never a full-screen flash.
- const alarm=failed?(reduced?1:.5+.5*Math.sin(t*4)):0;r(159,24,13,5,'#567064');r(162,17,7,7,failed?'#dc8067':'#729a77');if(alarm>.4)r(160,14,11,2,'#eaaa7c');
- // Conveyor with rotating rollers and scrolling stripes.
- r(0,121,320,9,'#0a2027');r(0,119,320,3,'#8c9a7a');const belt=index===0?Math.min(t,3)*10:0;
- for(let x=-20;x<340;x+=16){r(x+(belt%16),120,8,2,'#d1b779');r(x+3,125,7,4,'#547365');r(x+5,126,3,1,'#a3b38a')}
- r(0,132,320,28,'#1c3338');for(let x=0;x<320;x+=34)r(x,149,29,1,'#37534f');
- const door=index>=2?(index===2?ease((t-.7)/1.2):1):0;
- if(door>0){r(121,119,62,13,'#06181f');r(121,132,62,28,'#0a1d24');r(121,121,Math.round(30*(1-door)),3,'#a1a882');r(154+Math.round(29*door),121,Math.round(29*(1-door)),3,'#a1a882');r(125,150,53,3,'#ab634f');for(let x=128;x<178;x+=9)r(x,146,4,6,'#d69b6e');text('TRITURADOR',152,141,4,'#bb876b')}
- let x=137,y=77,pose='normal';
- if(index===0)x=20+117*ease(t/3.2);
- if(index===1)pose=t>1.2?'worried':'think';
- if(index===2){const fall=ease((t-1)/1.4);x=137+16*fall;y=77+35*fall;pose=fall>.85?'hang':'panic';}
- if(index===3){const pull=ease(t/1.8);x=153+30*pull+88*ease((t-2.1)/3.1);y=112-35*pull;pose=t<1.8?'hang':'run';}
- robot(x,y,pose);
- if(index===1&&t<1.7){r(146,57,25,13,'#d5dfb6');text('3?',158,66,8,'#315147');r(150,70,3,3,'#d5dfb6')}
- if(index===1&&t>=1.7){text('!',x-10,y+3,12,'#f0b57b');r(x+27,y-3,2,4,'#89c7c4')}
- if(index===2&&t>2.4){r(176,117,11,4,'#d7dfb9');text('…!',199,105,8,'#e6c58b')}
- if(index===3&&t>=5.3){r(282,118,20,2,'#c6e6a8');text('↗',257,70,10);}
- // A framing rail gives a fixed visual baseline across all shots.
- r(0,0,320,5,'#0a1b22');text('ENSAMBLAJE / 07',66,12,4,'#8aab93');text(`SUM-0 / ${index+1}`,278,12,4,'#8aab93');
- function robot(rx,ry,pose){const hang=pose==='hang',run=pose==='run';const stride=reduced?0:run&&t<5.3?Math.sin(t*10)*3:0;
-  r(rx+4,ry+33,6,9+Math.round(stride),'#6f9787');r(rx+19,ry+33,6,9-Math.round(stride),'#6f9787');r(rx+1,ry+41+stride,10,3,'#bdcfac');r(rx+18,ry+41-stride,11,3,'#bdcfac');
-  r(rx+1,ry+18,27,18,'#afcba9');r(rx+6,ry+22,16,10,'#648e79');r(rx+12,ry+25,5,5,'#e3c57e');
-  const tilt=pose==='think'?-2:pose==='worried'?2:0;r(rx+tilt,ry,30,19,'#bed7b4');r(rx+3+tilt,ry+4,24,11,'#193940');
-  r(rx+7+tilt,ry+8,4,pose==='worried'?2:4,'#c5f0a6');r(rx+21+tilt,ry+8,4,pose==='worried'?2:4,'#c5f0a6');r(rx+14+tilt,ry+13,4,1,'#87af8f');r(rx+14,ry-6,2,6,'#6b9583');r(rx+12,ry-8,5,3,pose==='panic'||hang?'#eca17c':'#e8ca85');
-  if(hang){r(rx-4,ry+22,4,15,'#7c9c86');r(rx-6,ry+35,8,4,'#cfdeb4');r(rx+27,ry+8,4,16,'#7c9c86');r(rx+26,ry+5,8,4,'#cfdeb4')}
-  else{const raised=pose==='panic'||pose==='think';r(rx-5,ry+(raised?9:22),5,15,'#7c9c86');r(rx-7,ry+(raised?7:33),8,5,'#c3d6ad');r(rx+28,ry+21,5,14,'#7c9c86');r(rx+28,ry+32,8,5,'#c3d6ad')}
- }
+ const t=reduced?6:clamp(time,0,6), W=320, H=160, F=118;
+ ctx.save(); ctx.scale(2,2);
+ const P=painter(ctx);
+ const amb=reduced?0:t;
+ const failed=index>1||(index===1&&t>1.6);
+ // backdrop: assembly hall
+ P.r(0,0,W,H,'#0b1a1f'); P.r(0,14,W,F-14,'#15303a'); for(let x=0;x<W;x+=4) P.r(x,14,2,F-14,'#1a3842');
+ P.part(-2,6,W+4,4,['#1d3940','#2c4d55','#4a6e72']); P.part(-2,14,W+4,4,['#1d3940','#2c4d55','#4a6e72']);
+ for(const x of [8,104,208]){ P.part(x,18,6,F-18,['#1d3940','#2c4d55','#4a6e72']); }
+ // alarm beacon glow
+ const alarm=failed?(reduced?1:.5+.5*Math.sin(t*5)):0;
+ P.part(156,20,10,5,failed?['#5a1010','#c43a3a','#ff7b6b']:['#2c3a3e','#435458','#64777a']);
+ if(alarm>0){ P.alpha(.1+alarm*.12,()=>P.r(0,0,W,H,'#ff3b2b')); P.alpha(.35*alarm,()=>P.disc(161,22,9,'#ff5b4b')); }
+ // QC screen
+ P.part(198,30,84,46,['#0c191d','#13262b','#2a4248']); P.r(202,34,76,38,index>0&&failed?'#2a1214':'#0f2a2e');
+ const scr=index===0?(Math.floor(amb*2)%2?'1 + 1 = ?':'1 + 1 =  '):index===1?(t<1.6?'1 + 1 = ?':t<2.2?'1 + 1 = 3':'ERROR'):index===2?'RECICLAJE':'SALIDA >';
+ P.text(scr,240,44,failed?'#ff9a8a':'#c9ffb2',index===1&&t>=2.2||index===2?2:1,'center');
+ P.text(index===0?'CONTROL DE CALIDAD':index===1&&failed?'CALCULO NO VALIDO':index===2?'UNIDAD DESCARTADA':'PUERTA ABIERTA',240,62,failed&&index<3?'#d47a6a':'#7fbf95',1,'center');
+ // exit door at the right
+ const doorOpen=index===3?ease.inOut((t-2.2)/1.4):0;
+ P.part(290,40,26,F-40,['#2a2a20','#3e3c2c','#5e5a40']); P.r(293,43,20,F-43,'#0a1430');
+ if(doorOpen>0){ for(let i=0;i<8;i++) P.r(294+Math.floor(hash(i)*18),46+Math.floor(hash(i+9)*50),1,1,'#dfe8ff'); P.r(293,F-10,20,10,'#0e1a2e'); }
+ P.part(293,43,20,Math.round((F-43)*(1-doorOpen)),['#3c4f50','#53696a','#7d9693']);
+ P.text('SALIDA',303,33,index===3?'#c9ffb2':'#4f7a5f',1,'center');
+ // QC robot arm overhead with scanner
+ const scanY=index===0?ease.inOut((t-3)/1.2):0;
+ P.limb(40,10,40,34,'#466c61',3); P.limb(40,34,92,40+Math.round(scanY*6),'#466c61',3);
+ P.part(88,38+Math.round(scanY*6),12,7,['#2f4d47','#466c61','#6f9886']); P.r(92,45+Math.round(scanY*6),4,1,'#c9ffb2');
+ if(index===0&&t>3&&t<5.2){ const sy=Math.round(70+Math.sin(t*6)*18); P.alpha(.35,()=>{ P.r(120,sy,60,1,'#c9ffb2'); }); P.alpha(.08,()=>P.r(120,52,60,F-52,'#c9ffb2')); }
+ // floor, conveyor and trapdoor pit
+ const pit=index>=2?(index===2?ease.inOut((t-.6)/.8):1):0, pitL=138, pitR=180;
+ P.r(0,F,W,H-F,'#1f3a3e');
+ if(pit>0){ P.r(pitL,F,pitR-pitL,H-F,'#06161b'); for(let i=0;i<7;i++){ const k=(Math.floor(amb*16)+i)%3; P.r(pitL+3+i*6,H-10+(k===0?0:1),4,3,'#c6d0cc'); } P.alpha(.3+.2*Math.sin(amb*6),()=>P.r(pitL,H-16,pitR-pitL,16,'#ff8a3d')); }
+ P.r(0,F,W,2,'#5a7e76'); P.r(0,F+2,W,8,'#2c4447');
+ const belt=index===0?(reduced?0:Math.min(t,3.2)*22):0;
+ for(let x=-16;x<W+16;x+=10){ P.r(Math.round(x+belt%10),F+2,4,1,'#8a9a7a'); }
+ for(let x=6;x<W;x+=20){ P.disc(x,F+6,3,OL); P.disc(x,F+6,2,'#547365'); P.r(x+Math.round(Math.cos(belt*.3+x)*1),F+6+Math.round(Math.sin(belt*.3+x)*1),1,1,'#b3c39a'); }
+ if(pit>0){ const half=Math.round((pitR-pitL)/2*(1-pit)); P.r(pitL,F,pitR-pitL,10,'#06161b'); P.part(pitL,F,half,4,['#2c4447','#5a7e76','#8aa8a0']); P.part(pitR-half,F,half,4,['#2c4447','#5a7e76','#8aa8a0']); }
+ // SUM-0
+ let x=158,y=F,pose='idle',face='normal',look=0;
+ if(index===0){ x=Math.round(-24+182*ease.out(t/3.2)); look=t<3.2?Math.round(Math.sin(t*2)):1; face=t>5?'think':t>3.2?'focus':'normal'; }
+ if(index===1){ face=t<1.6?'think':t<2.2?'happy':'worried'; if(t>2.2&&t<2.6) y-=Math.round(Math.sin((t-2.2)/.4*Math.PI)*6); }
+ if(index===2){ const fall=ease.inOut((t-1)/1.1); face=t<1?'worried':'panic'; pose=fall>.9?'hang':t>1?'panic':'idle'; y=F+Math.round(fall*32); x=158+Math.round(fall*2); if(fall>.9){ face='worried'; } }
+ if(index===3){ const climb=ease.inOut(t/1.8), run=ease.inOut((t-2)/3); if(t<1.8){ pose='hang'; face='focus'; y=F+32-Math.round(climb*32); x=160; } else { pose=t<5.1?'run':'idle'; face='focus'; x=160+Math.round(run*128); look=1; if(t>5.1) face='happy'; } }
+ drawSum0(P,x,y,{t:amb,pose,face,look});
+ if(index===2&&pit>0) { P.r(pitL-1,F+10,pitR-pitL+2,2,'#06161b'); }
+ // speech marks
+ if(index===1&&t>.3&&t<1.6){ P.part(x+12,F-58,22,13,['#9fb0a0','#e8f0d8','#ffffff']); P.text('3?',x+23,F-54,'#2a4a40',1,'center'); P.r(x+12,F-44,3,2,'#e8f0d8'); P.r(x+9,F-41,2,2,'#e8f0d8'); }
+ if(index===1&&t>=2.2){ P.text('!',x-14,F-46,'#ffcb77',2); P.r(x+12,F-40,1,3,'#9ff6ff'); }
+ if(index===2&&t>2.3){ P.text('!',x-16,F-12,'#ffcb77',2); }
+ if(index===3&&t>5.1){ for(let i=0;i<3;i++) P.r(x+16+i*5,F-40-i*3,2,2,'#c9ffb2'); }
+ // framing rail
+ P.r(0,0,W,5,'#0a1b22'); P.text('ENSAMBLAJE 07',6,0,'#5f8a78'); P.text(`SUM-0 ${index+1}/4`,W-6,0,'#5f8a78',1,'right');
  ctx.restore();
 }

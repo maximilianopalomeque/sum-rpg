@@ -1,1 +1,1 @@
-import {mkdir,copyFile} from 'node:fs/promises';await mkdir('dist',{recursive:true});for(const f of ['index.html','style.css','main.js','engine.js','art.js','story.js'])await copyFile(f,`dist/${f}`);console.log('Built static game in dist/');
+import {mkdir,copyFile} from 'node:fs/promises';await mkdir('dist',{recursive:true});for(const f of ['index.html','style.css','main.js','engine.js','art.js','story.js','pixel.js','actors.js','icons.js'])await copyFile(f,`dist/${f}`);console.log('Built static game in dist/');

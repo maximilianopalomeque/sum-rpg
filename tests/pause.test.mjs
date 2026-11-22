@@ -4,12 +4,13 @@ import vm from 'node:vm';
 import fs from 'node:fs';
 import * as story from '../story.js';
 import * as engine from '../engine.js';
+import * as icons from '../icons.js';
 function ui(){
  const listeners={},elements=new Map();
  const element=id=>{if(!elements.has(id))elements.set(id,{style:{},dataset:{},value:'',textContent:'',innerHTML:'',children:id==='route'?[{},{},{}]:[],focus(){},querySelector(){return {focus(){}}},addEventListener(){},setAttribute(){},getContext(){return {}}});return elements.get(id)};
  const document={getElementById:element,hidden:false,addEventListener(name,fn){listeners['document:'+name]=fn}};
  const window={addEventListener(name,fn){listeners['window:'+name]=fn}};
- const context=vm.createContext({...engine,...story,paintStory(){},paint(){},document,window,matchMedia:()=>({matches:false}),requestAnimationFrame(){},console});
+ const context=vm.createContext({...engine,...story,...icons,paintStory(){},paint(){},document,window,matchMedia:()=>({matches:false}),requestAnimationFrame(){},console});
  vm.runInContext(fs.readFileSync(new URL('../main.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,''),context);
  return {run:code=>vm.runInContext(code,context),listeners,document,element};
 }
