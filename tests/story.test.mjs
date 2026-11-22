@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {paintStory,advanceScene} from '../story.js';
+function draw(index,time,reduced){const calls=[];const ctx={save(){},restore(){},scale(){},fillRect(...args){calls.push(args)},fillText(...args){calls.push(args)}};paintStory(ctx,index,time,reduced);return calls;}
+test('all four scenes render; reduced motion produces static drawings',()=>{for(let i=0;i<4;i++){assert.ok(draw(i,1,false).length>30);assert.deepEqual(draw(i,1,true),draw(i,99,true));}assert.notDeepEqual(draw(3,1,false),draw(3,5,false));assert.equal(advanceScene(3),null);});
