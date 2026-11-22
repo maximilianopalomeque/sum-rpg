@@ -63,7 +63,7 @@ function renderOverlay(){const over=$('overlay');let html='';const waiting=hold>
  over.hidden=!html;over.dataset.kind=paused?'pause':state.phase;if(html!==over.dataset.html){over.innerHTML=html?`<div class="modal ${state.phase==='cinematic'&&!paused?'cinematic':''} ${state.phase==='upgrade'&&!paused?'shop':''}" role="dialog" aria-modal="true" aria-label="${paused?'Juego en pausa':state.phase==='upgrade'?'Elegí una mejora':'Aventura SUM-0'}">${html}</div>`:'';over.dataset.html=html;if(html)over.querySelector(state.phase==='cinematic'?'[data-action="next-scene"]':'button')?.focus({preventScroll:true});}}
 
 function clearAnswer(){$('answer').value='';$('equation').dataset.state='';}
-function reset(){state=initial();paused=false;hold=0;feedbackTime=0;state.round=startRound;begin(state);clearAnswer();render();focus();}
+function reset(){state=initial();paused=false;hold=0;feedbackTime=0;state.round=startRound;if(query.get('powers')){state.powers=query.get('powers').split(',').filter(id=>upgrades.some(u=>u.id===id&&id!=='heal'));state.charge=state.powers.includes('charge')?4:0;}begin(state);clearAnswer();render();focus();}
 function submit(timeout=false){if(paused||state.phase!=='battle')return;const raw=$('answer').value.trim();if(!timeout&&!/^\d{1,3}$/.test(raw)){$('feedback').textContent='Escribí un número para cargar el disparo.';focus();return;}
  const shield=state.shield,hp=state.hp;const ok=answer(state,Number(raw),timeout);
  sfx(ok?(state.lastDamage>1?'big':'hit'):(shield&&state.hp===hp?'block':'hurt'));

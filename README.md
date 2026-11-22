@@ -16,6 +16,7 @@ Parámetros de desarrollo:
 
 - `?gallery` muestra todos los personajes y sus poses animadas.
 - `?round=N` (de 0 a 5) arranca la partida en ese encuentro.
+- `?powers=shield,freeze,charge,combo,regen,battery` arranca con esos módulos instalados y el pulso cargado.
 
 ## Cómo se juega
 
