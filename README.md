@@ -1,6 +1,32 @@
 # SUM-0 — Error de fábrica
 
-Juego de rol aritmético en pixel art, en español. SUM-0 tiene el módulo de cálculo roto y la fábrica lo mandó a reciclar: escapa resolviendo sumas. JavaScript nativo y Canvas 2D, sin dependencias, sin recursos externos y sin backend.
+> 🚧 **Work in progress.** El código está abierto para verlo, pero por ahora no acepto contribuciones: issues y pull requests están cerrados a colaboradores.
+
+![Combate contra el Reciclador Central en La Salida](docs/boss.jpg)
+
+## De qué se trata
+
+SUM-0 es un robot recién salido de la línea de montaje con un problema: en el control de calidad le preguntan cuánto es 1 + 1 y contesta «¿tres?». El sistema central lo declara defectuoso y lo manda al triturador. SUM-0 se escapa colgado del borde de la trampa y decide salir de la fábrica, aunque tenga que aprender a sumar en el camino.
+
+Cada combate es una suma contra reloj:
+
+- **Acertás**: SUM-0 dispara su cañón y el enemigo pierde resistencia.
+- **Te equivocás o se acaba el tiempo**: el enemigo contraataca y perdés vida, pero ves la respuesta correcta para la próxima.
+
+Hay seis robots de la fábrica en tres zonas (Depósito, Fundición y La Salida), con sumas cada vez más grandes y menos tiempo:
+
+- Un barrendero con malas intenciones.
+- Un cangrejo cobrador de impuestos.
+- Un inspector con monóculo.
+- Un dron que cuenta tus errores.
+- Un triturador que sueña con ser licuadora.
+- El Reciclador Central, el jefe final.
+
+Entre combate y combate armás tu propia combinación de módulos en un taller improvisado: escudo, reloj que congela el tiempo, combos, curación y un pulso de energía.
+
+Es una partida corta de 3 a 5 minutos, con humor y pensada para que equivocarse sea parte del juego. Está escrito en JavaScript nativo y Canvas 2D: sin dependencias, sin recursos externos y sin backend. Todo el arte es pixel art original dibujado con código.
+
+![SUM-0 dispara contra el Inspector de restos en la Fundición](docs/fundicion.jpg)
 
 ## Ejecutar
 
